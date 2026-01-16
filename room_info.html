@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin phòng - PTIT</title>
+    <style>
+        /* --- COPY LẠI CSS TỪ FILE ADMIN.HTML (GIỮ NGUYÊN) --- */
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #fff5f5; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background-color: #ff3333; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; flex-shrink: 0; }
+        .menu-icon { font-size: 30px; cursor: pointer; }
+        .user-pill { background-color: #ff9966; padding: 5px 25px; border-radius: 20px; text-align: center; color: white; font-weight: bold; font-size: 13px; line-height: 1.4; }
+        
+        .container { display: flex; flex: 1; overflow: hidden; }
+        
+        .sidebar { width: 300px; background-color: white; border-right: 2px solid #ff3333; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; transition: width 0.3s ease, border 0.3s ease; flex-shrink: 0; }
+        .sidebar.collapsed { width: 0; border: none; }
+        .menu-list { flex: 1; padding: 0 20px; }
+        .menu-item { padding: 15px 0; border-bottom: 2px solid #ffcccc; color: #ff3333; font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; text-decoration: none; /* Thêm để bỏ gạch chân link */ }
+        .menu-item:hover { color: #cc0000; }
+        .menu-item.active { font-weight: bold; }
+        
+        .sidebar-footer { padding: 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .footer-logo { width: 50px; height: auto; }
+        .footer-text { font-size: 10px; font-weight: bold; color: #cc3333; text-transform: uppercase; line-height: 1.3; }
+        
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; transition: flex 0.3s ease; }
+
+        /* --- CSS RIÊNG CHO TRANG THÔNG TIN PHÒNG --- */
+        
+        /* Tiêu đề "Phòng J01" */
+        .room-title {
+            color: #ff3333;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+
+        /* Chữ "Thành viên:" */
+        .sub-label {
+            color: #ff3333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* Khung chữ nhật lớn (Members Box) */
+        .member-box {
+            border: 2px solid #ff3333;
+            background-color: #fff0f0;
+            height: 250px; /* Chiều cao cố định giống ảnh */
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        /* Lưới hiển thị thông tin điện nước (3 cột) */
+        .utility-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Chia 3 cột đều nhau */
+            row-gap: 20px; /* Khoảng cách giữa các dòng */
+            color: #ff3333;
+            font-size: 16px;
+        }
+
+        /* Dòng tổng tiền căn giữa */
+        .total-price {
+            text-align: center;
+            color: #ff3333;
+            font-size: 20px;
+            margin-top: 40px;
+        }
+
+        /* CSS cho danh sách thành viên */
+        .member-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            align-content: flex-start;
+        }
+
+        .member-item {
+            background-color: white;
+            border: 1px solid #ff9999;
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: #ff3333;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .member-item:hover {
+            background-color: #ff3333;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .member-item.delete-mode {
+            border: 2px solid #ff3333;
+            background-color: #fff0f0;
+        }
+
+        .member-item.delete-mode:hover {
+            background-color: #ffcccc;
+            color: #ff3333;
+        }
+
+        .member-name {
+            flex: 1;
+        }
+
+        .btn-delete-member {
+            background-color: transparent;
+            color: inherit;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            display: none;
+        }
+
+        .btn-delete-member:hover {
+            transform: scale(1.3);
+        }
+
+        /* Nút thêm sinh viên */
+        .btn-add-member, .btn-delete-member-modal {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-add-member:hover, .btn-delete-member-modal:hover {
+            background-color: #cc0000;
+        }
+
+        /* CSS cho dropdown chọn phòng */
+        .room-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 0 15px;
+        }
+
+        .room-selector label {
+            color: #ff3333;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .room-selector select {
+            padding: 8px 15px;
+            border: 2px solid #ff3333;
+            border-radius: 5px;
+            background-color: white;
+            color: #ff3333;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .room-selector select:focus {
+            outline: none;
+            background-color: #fff0f0;
+        }
+
+        /* CSS cho modal/dialog thêm sinh viên */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 2px solid #ff3333;
+            border-radius: 10px;
+            width: 350px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff3333;
+            margin-bottom: 15px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ff9999;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .modal-btn-add {
+            background-color: #ff3333;
+            color: white;
+        }
+
+        .modal-btn-add:hover {
+            background-color: #cc0000;
+        }
+
+        .modal-btn-cancel {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #999;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <div class="user-pill">
+            Nguyễn Trung A<br>
+            N23DCVTXXX
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="sidebar" id="sidebar">
+            <div class="menu-list">
+                <a href="home.html" class="menu-item"><span>🏠</span> Trang chủ</a>
+                <a href="#" class="menu-item">Thông báo</a>
+                
+                <a href="room_info.html" class="menu-item active">Thông tin phòng</a>
+                
+                <a href="profile.html" class="menu-item">Thông tin cá nhân</a>
+                <a href="#" class="menu-item">Hóa đơn</a>
+                <a href="#" class="menu-item">Đổi mật khẩu</a>
+                <a href="#" class="menu-item">Hỗ trợ</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+                <div class="footer-text">
+                    HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>
+                    VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <h2 class="room-title">Thông tin phòng</h2>
+            
+            <div class="room-selector">
+                <label for="roomSelect">Chọn phòng:</label>
+                <select id="roomSelect" onchange="loadRoom(this.value)">
+                    <option value="">----</option>
+                    <option value="J01">Phòng J01</option>
+                    <option value="J02">Phòng J02</option>
+                </select>
+            </div>
+            
+            <div class="sub-label" id="memberLabel" style="display: none;">Thành viên:</div>
+            
+            <div class="member-box" id="memberBox" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 15px;">
+                    <button class="btn-add-member" onclick="openAddMemberModal()">+ Thêm sinh viên</button>
+                    <button class="btn-delete-member-modal" onclick="openDeleteMemberModal()" id="toggleDeleteBtn">- Xóa sinh viên</button>
+                </div>
+                <div class="member-list" id="memberList">
+                    <div class="member-item" data-code="N23DCVT001" data-name="Nguyen Van A" data-bed="G5" onclick="handleMemberClick('N23DCVT001', 'Nguyen Van A', 'J01', 'G5', 'Đã đóng tiền')">
+                        Nguyen Van A
+                    </div>
+                    <div class="member-item" data-code="N23DCVT002" data-name="Nguyen Van B" data-bed="G6" onclick="handleMemberClick('N23DCVT002', 'Nguyen Van B', 'J01', 'G6', 'Đã đóng tiền')">
+                        Nguyen Van B
+                    </div>
+                </div>
+            </div>
+
+            <div class="utility-grid" id="utilityGrid" style="display: none;">
+                <div>Số điện cũ: xx (16/06/2026)</div>
+                <div>Số điện hiện tại: xx</div>
+                <div>Đơn giá: 3500 / kwh</div>
+
+                <div>Số nước cũ : xx (16/06/2026)</div>
+                <div>Số nước hiện tại: xx</div>
+                <div>Đơn giá: 15000VNĐ / khối</div>
+            </div>
+
+            <div class="total-price" id="totalPrice" style="display: none;">
+                Tổng tiền: xx
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal thêm sinh viên -->
+    <div id="addMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Thêm sinh viên</div>
+            <input type="text" id="studentCode" class="modal-input" placeholder="Mã sinh viên (VD: N23DCVT003)">
+            <input type="text" id="studentName" class="modal-input" placeholder="Tên sinh viên (VD: Nguyen Van C)">
+            <input type="text" id="bedNumber" class="modal-input" placeholder="Giường (VD: G7)">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeAddMemberModal()">Hủy</button>
+                <button class="modal-btn modal-btn-add" onclick="addMember()">Thêm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xóa sinh viên -->
+    <div id="deleteMemberModal" class="modal">
+        <div class="modal-content" style="width: 450px;">
+            <div class="modal-header">Chọn sinh viên để xóa</div>
+            <div id="deleteCheckboxList" style="max-height: 300px; overflow-y: auto; border: 1px solid #ffcccc; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteMemberModal()">Hủy</button>
+                <button class="modal-btn modal-btn-add" onclick="deleteSelectedMembers()">Xóa đã chọn</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu phòng
+        const roomsData = {
+            'J01': {
+                members: [
+                    { code: 'N23DCVT001', name: 'Nguyen Van A', bed: 'G5' },
+                    { code: 'N23DCVT002', name: 'Nguyen Van B', bed: 'G6' }
+                ]
+            },
+            'J02': {
+                members: [
+                    { code: 'N23DCVT003', name: 'Nguyen Van C', bed: 'G7' },
+                    { code: 'N23DCVT004', name: 'Nguyen Van D', bed: 'G8' }
+                ]
+            }
+        };
+
+        let currentRoom = '';
+
+        function loadRoom(room) {
+            currentRoom = room;
+            const memberLabel = document.getElementById("memberLabel");
+            const memberBox = document.getElementById("memberBox");
+            const utilityGrid = document.getElementById("utilityGrid");
+            const totalPrice = document.getElementById("totalPrice");
+            
+            if (room === '') {
+                // Ẩn tất cả khi chọn "----"
+                memberLabel.style.display = 'none';
+                memberBox.style.display = 'none';
+                utilityGrid.style.display = 'none';
+                totalPrice.style.display = 'none';
+                return;
+            }
+            
+            // Hiển thị khi chọn phòng
+            memberLabel.style.display = 'block';
+            memberBox.style.display = 'block';
+            utilityGrid.style.display = 'grid';
+            totalPrice.style.display = 'block';
+            
+            const roomData = roomsData[room];
+            const memberList = document.getElementById("memberList");
+            const roomTitle = document.querySelector('.room-title');
+            
+            // Cập nhật tiêu đề
+            roomTitle.textContent = 'Thông tin phòng';
+            
+            // Xóa các member cũ
+            memberList.innerHTML = '';
+            
+            // Thêm các member mới
+            roomData.members.forEach(member => {
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'member-item';
+                memberDiv.setAttribute('data-code', member.code);
+                memberDiv.setAttribute('data-name', member.name);
+                memberDiv.setAttribute('data-bed', member.bed);
+                memberDiv.textContent = member.name;
+                memberDiv.onclick = function() {
+                    handleMemberClick(member.code, member.name, room, member.bed, 'Đã đóng tiền');
+                };
+                memberList.appendChild(memberDiv);
+            });
+        }
+
+        function openAddMemberModal() {
+            document.getElementById("addMemberModal").style.display = "block";
+            document.getElementById("studentCode").value = "";
+            document.getElementById("studentName").value = "";
+            document.getElementById("bedNumber").value = "";
+        }
+
+        function closeAddMemberModal() {
+            document.getElementById("addMemberModal").style.display = "none";
+        }
+
+        function addMember() {
+            var code = document.getElementById("studentCode").value.trim();
+            var name = document.getElementById("studentName").value.trim();
+            var bed = document.getElementById("bedNumber").value.trim();
+
+            if (code === "" || name === "" || bed === "") {
+                alert("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+
+            // Thêm vào data
+            roomsData[currentRoom].members.push({
+                code: code,
+                name: name,
+                bed: bed
+            });
+
+            // Cập nhật hiển thị
+            loadRoom(currentRoom);
+            closeAddMemberModal();
+        }
+
+        let deleteMode = false;
+
+        function openDeleteMemberModal() {
+            var memberList = document.getElementById("memberList");
+            var memberItems = memberList.querySelectorAll(".member-item");
+            var checkboxList = document.getElementById("deleteCheckboxList");
+            
+            checkboxList.innerHTML = "";
+            
+            memberItems.forEach(item => {
+                var code = item.getAttribute("data-code");
+                var name = item.getAttribute("data-name");
+                
+                var label = document.createElement("label");
+                label.style.display = "flex";
+                label.style.alignItems = "center";
+                label.style.padding = "8px 0";
+                label.style.cursor = "pointer";
+                label.style.color = "#ff3333";
+                
+                var checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.value = code;
+                checkbox.style.marginRight = "10px";
+                checkbox.style.cursor = "pointer";
+                checkbox.style.width = "18px";
+                checkbox.style.height = "18px";
+                
+                var text = document.createElement("span");
+                text.textContent = name;
+                
+                label.appendChild(checkbox);
+                label.appendChild(text);
+                checkboxList.appendChild(label);
+            });
+            
+            document.getElementById("deleteMemberModal").style.display = "block";
+        }
+
+        function closeDeleteMemberModal() {
+            document.getElementById("deleteMemberModal").style.display = "none";
+        }
+
+        function deleteSelectedMembers() {
+            var checkboxes = document.querySelectorAll("#deleteCheckboxList input[type='checkbox']:checked");
+            
+            if (checkboxes.length === 0) {
+                alert("Vui lòng chọn ít nhất một sinh viên để xóa!");
+                return;
+            }
+            
+            if (confirm("Bạn có chắc muốn xóa " + checkboxes.length + " sinh viên?")) {
+                checkboxes.forEach(checkbox => {
+                    var code = checkbox.value;
+                    // Xóa từ data
+                    roomsData[currentRoom].members = roomsData[currentRoom].members.filter(m => m.code !== code);
+                });
+                // Cập nhật hiển thị
+                loadRoom(currentRoom);
+                closeDeleteMemberModal();
+            }
+        }
+
+        function handleMemberClick(code, name, room, bed, status) {
+            viewProfile(code, name, room, bed, status);
+        }
+
+        function removeMember(event) {
+            event.stopPropagation();
+            var memberItem = event.target.closest(".member-item");
+            var memberName = memberItem.getAttribute("data-name");
+            
+            if (confirm("Bạn có chắc muốn xóa " + memberName + " khỏi phòng?")) {
+                memberItem.remove();
+            }
+        }
+
+        // Nút X để đóng modal khi click vào background
+        window.onclick = function(event) {
+            var modal = document.getElementById("addMemberModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function viewProfile(code, name, room, bed, status) {
+            // Lưu thông tin vào localStorage để truyền sang profile.html
+            localStorage.setItem('profileData', JSON.stringify({
+                code: code,
+                name: name,
+                room: room,
+                bed: bed,
+                status: status
+            }));
+            // Chuyển sang trang profile.html
+            window.location.href = "profile.html";
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+
+</body>
+</html>

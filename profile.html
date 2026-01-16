@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - PTIT</title>
+    <style>
+        /* --- COPY LẠI CSS CHUNG (GIỮ NGUYÊN TỪ CÁC FILE TRƯỚC) --- */
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #fff5f5; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background-color: #ff3333; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; flex-shrink: 0; }
+        .menu-icon { font-size: 30px; cursor: pointer; }
+        .user-pill { background-color: #ff9966; padding: 5px 25px; border-radius: 20px; text-align: center; color: white; font-weight: bold; font-size: 13px; line-height: 1.4; }
+        
+        .container { display: flex; flex: 1; overflow: hidden; }
+        
+        .sidebar { width: 300px; background-color: white; border-right: 2px solid #ff3333; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; transition: width 0.3s ease, border 0.3s ease; flex-shrink: 0; }
+        .sidebar.collapsed { width: 0; border: none; }
+        .menu-list { flex: 1; padding: 0 20px; }
+        .menu-item { padding: 15px 0; border-bottom: 2px solid #ffcccc; color: #ff3333; font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .menu-item:hover { color: #cc0000; }
+        .menu-item.active { font-weight: bold; }
+        
+        .sidebar-footer { padding: 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .footer-logo { width: 50px; height: auto; }
+        .footer-text { font-size: 10px; font-weight: bold; color: #cc3333; text-transform: uppercase; line-height: 1.3; }
+        
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; transition: flex 0.3s ease; }
+
+        /* --- CSS RIÊNG CHO TRANG PROFILE --- */
+
+        /* Tiêu đề giữa trang */
+        .page-title {
+            text-align: center;
+            color: #ff3333;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Khung thẻ thông tin */
+        .profile-card {
+            border: 2px solid #ff3333;
+            border-radius: 30px; /* Bo góc tròn nhiều hơn */
+            background-color: #fff0f0;
+            padding: 40px;
+            display: flex; /* Chia đôi trái phải */
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto; /* Căn giữa màn hình */
+            gap: 50px; /* Khoảng cách giữa ảnh và chữ */
+            min-height: 400px;
+        }
+
+        /* Cột bên trái: Ảnh đại diện */
+        .avatar-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%; /* Hình tròn */
+            background-color: #444; /* Màu xám đen giống ảnh */
+            /* Hoặc dùng ảnh thật thì bỏ background-color đi */
+            object-fit: cover;
+        }
+
+        /* Cột bên phải: Thông tin chữ */
+        .info-section {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Khoảng cách các dòng */
+            font-size: 18px;
+        }
+
+        .info-row {
+            display: flex;
+        }
+
+        .info-label {
+            width: 120px; /* Độ rộng cột nhãn */
+            color: #ff3333;
+            font-weight: normal;
+        }
+
+        .info-value {
+            color: #ff3333;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* CSS cho chế độ edit */
+        .edit-input {
+            background-color: white;
+            border: 1px solid #ff9999;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: #ff3333;
+            font-size: 16px;
+            font-weight: bold;
+            flex: 1;
+            box-sizing: border-box;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border: 2px solid #ff3333;
+            background-color: #fffafa;
+        }
+
+        .edit-select {
+            background-color: white;
+            border: 1px solid #ff9999;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: #ff3333;
+            font-size: 16px;
+            font-weight: bold;
+            flex: 1;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .edit-select:focus {
+            outline: none;
+            border: 2px solid #ff3333;
+        }
+
+        .btn-edit-save {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            margin-right: 10px;
+        }
+
+        .btn-edit-save:hover {
+            background-color: #cc0000;
+        }
+
+        .btn-cancel {
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-cancel:hover {
+            background-color: #999;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <div class="user-pill">
+            Nguyễn Trung A<br>
+            N23DCVTXXX
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="sidebar" id="sidebar">
+            <div class="menu-list">
+                <a href="home.html" class="menu-item"><span>🏠</span> Trang chủ</a>
+                <a href="#" class="menu-item">Thông báo</a>
+                <a href="room_info.html" class="menu-item">Thông tin phòng</a>
+                
+                <a href="profile.html" class="menu-item active">Thông tin cá nhân</a>
+                
+                <a href="#" class="menu-item">Hóa đơn</a>
+                <a href="#" class="menu-item">Đổi mật khẩu</a>
+                <a href="#" class="menu-item">Hỗ trợ</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+                <div class="footer-text">
+                    HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>
+                    VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <div class="page-title">Thông tin cá nhân</div>
+
+            <div class="profile-card">
+                <div class="avatar-section">
+                    <img src="https://cdn-icons-png.flaticon.com/512/6596/6596121.png" alt="Avatar" class="avatar-img">
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">Mã SV:</div>
+                        <div class="info-value" id="infoCode">N23DCVT0XX</div>
+                        <input type="text" class="edit-input" id="editCode" style="display: none;">
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tên SV:</div>
+                        <div class="info-value" id="infoName">Nguyễn Văn A</div>
+                        <input type="text" class="edit-input" id="editName" style="display: none;">
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Phòng:</div>
+                        <div class="info-value" id="infoRoom">J01</div>
+                        <input type="text" class="edit-input" id="editRoom" style="display: none;">
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Giường:</div>
+                        <div class="info-value" id="infoBed">G5</div>
+                        <input type="text" class="edit-input" id="editBed" style="display: none;">
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tình trạng:</div>
+                        <div class="info-value" id="infoStatus">Đã đóng tiền</div>
+                        <select class="edit-select" id="editStatus" style="display: none;">
+                            <option value="Đã đóng tiền">Đã đóng tiền</option>
+                            <option value="Chưa đóng tiền">Chưa đóng tiền</option>
+                        </select>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-edit-save" onclick="toggleEditMode()" id="editToggleBtn">Chỉnh sửa</button>
+                        <button class="btn-edit-save" onclick="saveProfile()" id="saveBtn" style="display: none;">Lưu</button>
+                        <button class="btn-cancel" onclick="cancelEdit()" id="cancelBtn" style="display: none;">Hủy</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        let originalData = {};
+
+        // Tải thông tin cá nhân từ localStorage
+        window.addEventListener('load', function() {
+            var profileData = localStorage.getItem('profileData');
+            if (profileData) {
+                var data = JSON.parse(profileData);
+                originalData = JSON.parse(JSON.stringify(data));
+                
+                document.getElementById('infoCode').textContent = data.code;
+                document.getElementById('infoName').textContent = data.name;
+                document.getElementById('infoRoom').textContent = data.room;
+                document.getElementById('infoBed').textContent = data.bed;
+                document.getElementById('infoStatus').textContent = data.status;
+            }
+        });
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                // Chuyển sang chế độ edit
+                document.getElementById('infoCode').style.display = 'none';
+                document.getElementById('infoName').style.display = 'none';
+                document.getElementById('infoRoom').style.display = 'none';
+                document.getElementById('infoBed').style.display = 'none';
+                document.getElementById('infoStatus').style.display = 'none';
+                
+                document.getElementById('editCode').style.display = 'block';
+                document.getElementById('editName').style.display = 'block';
+                document.getElementById('editRoom').style.display = 'block';
+                document.getElementById('editBed').style.display = 'block';
+                document.getElementById('editStatus').style.display = 'block';
+                
+                // Điền giá trị vào các field edit
+                document.getElementById('editCode').value = document.getElementById('infoCode').textContent;
+                document.getElementById('editName').value = document.getElementById('infoName').textContent;
+                document.getElementById('editRoom').value = document.getElementById('infoRoom').textContent;
+                document.getElementById('editBed').value = document.getElementById('infoBed').textContent;
+                document.getElementById('editStatus').value = document.getElementById('infoStatus').textContent;
+                
+                document.getElementById('editToggleBtn').style.display = 'none';
+                document.getElementById('saveBtn').style.display = 'inline-block';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+            }
+        }
+
+        function saveProfile() {
+            var code = document.getElementById('editCode').value.trim();
+            var name = document.getElementById('editName').value.trim();
+            var room = document.getElementById('editRoom').value.trim();
+            var bed = document.getElementById('editBed').value.trim();
+            var status = document.getElementById('editStatus').value;
+            
+            if (code === '' || name === '' || room === '' || bed === '') {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+            
+            // Cập nhật hiển thị
+            document.getElementById('infoCode').textContent = code;
+            document.getElementById('infoName').textContent = name;
+            document.getElementById('infoRoom').textContent = room;
+            document.getElementById('infoBed').textContent = bed;
+            document.getElementById('infoStatus').textContent = status;
+            
+            // Lưu vào localStorage
+            localStorage.setItem('profileData', JSON.stringify({
+                code: code,
+                name: name,
+                room: room,
+                bed: bed,
+                status: status
+            }));
+            
+            // Thoát chế độ edit
+            exitEditMode();
+        }
+
+        function cancelEdit() {
+            exitEditMode();
+        }
+
+        function exitEditMode() {
+            isEditMode = false;
+            
+            // Ẩn các input edit
+            document.getElementById('editCode').style.display = 'none';
+            document.getElementById('editName').style.display = 'none';
+            document.getElementById('editRoom').style.display = 'none';
+            document.getElementById('editBed').style.display = 'none';
+            document.getElementById('editStatus').style.display = 'none';
+            
+            // Hiển thị các giá trị
+            document.getElementById('infoCode').style.display = 'block';
+            document.getElementById('infoName').style.display = 'block';
+            document.getElementById('infoRoom').style.display = 'block';
+            document.getElementById('infoBed').style.display = 'block';
+            document.getElementById('infoStatus').style.display = 'block';
+            
+            // Hiển thị nút Chỉnh sửa
+            document.getElementById('editToggleBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+
+</body>
+</html>

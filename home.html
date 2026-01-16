@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - PTIT</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #fff5f5; height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #ff3333; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; flex-shrink: 0; }
+        .menu-icon { font-size: 30px; cursor: pointer; }
+        .user-pill { background-color: #ff9966; padding: 5px 25px; border-radius: 20px; text-align: center; color: white; font-weight: bold; font-size: 13px; line-height: 1.4; }
+        .container { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 300px; background-color: white; border-right: 2px solid #ff3333; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; transition: width 0.3s ease, border 0.3s ease; flex-shrink: 0; }
+        .sidebar.collapsed { width: 0; border: none; }
+        .menu-list { flex: 1; padding: 0 20px; }
+        .menu-item { padding: 15px 0; border-bottom: 2px solid #ffcccc; color: #ff3333; font-size: 18px; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .menu-item:hover { color: #cc0000; }
+        .menu-item.active { font-weight: bold; }
+        .sidebar-footer { padding: 20px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .footer-logo { width: 50px; height: auto; }
+        .footer-text { font-size: 10px; font-weight: bold; color: #cc3333; text-transform: uppercase; line-height: 1.3; }
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: flex 0.3s ease; }
+        
+        .welcome-big { font-size: 30px; color: #ff3333; font-weight: bold; margin-bottom: 20px; }
+        .news-box { width: 80%; background: white; padding: 20px; border-radius: 10px; border: 1px solid #ffcccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <div class="user-pill">Nguyễn Trung A<br>N23DCVTXXX</div>
+    </div>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="menu-list">
+                <a href="home.html" class="menu-item active"><span>🏠</span> Trang chủ</a>
+                <a href="#" class="menu-item">Thông báo</a>
+                <a href="room_info.html" class="menu-item">Thông tin phòng</a>
+                <a href="admin.html" class="menu-item">Thông tin cá nhân</a>
+                <a href="#" class="menu-item">Hóa đơn</a>
+                <a href="#" class="menu-item">Đổi mật khẩu</a>
+                <a href="#" class="menu-item">Hỗ trợ</a>
+            </div>
+            <div class="sidebar-footer">
+                <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+                <div class="footer-text">HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH</div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="welcome-big">TRANG CHỦ</div>
+            <div class="news-box">
+                <p>Chào mừng bạn đến với hệ thống quản lý KTX.</p>
+                <p>(Nội dung tin tức sẽ được cập nhật sau...)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+</html>

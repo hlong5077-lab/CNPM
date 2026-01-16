@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập PTIT</title>
+    <style>
+        /* (GIỮ NGUYÊN CSS CŨ CỦA BẠN) */
+        body { background-color: #fff0f0; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { width: 100%; max-width: 400px; text-align: center; padding: 20px; }
+        .header-text { color: #ff3333; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; font-size: 16px; line-height: 1.5; }
+        .logo { width: 80px; height: auto; margin-bottom: 30px; }
+        .input-group { margin-bottom: 15px; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 15px; border: 2px solid #ff9999; border-radius: 50px; outline: none; box-sizing: border-box; font-size: 16px; color: #333; }
+        input::placeholder { color: #666; }
+        .forgot-pass { display: block; text-align: right; color: #ff3333; font-style: italic; text-decoration: none; margin-bottom: 20px; font-size: 14px; margin-right: 10px; }
+        .btn-login { background-color: #ff3333; color: white; border: none; width: 150px; padding: 12px; border-radius: 50px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-login:hover { background-color: #e60000; }
+        
+        /* Chỉnh lại dòng lỗi để ẩn hiện bằng JS */
+        .error-msg { color: #ff3333; margin-top: 20px; font-size: 14px; display: none; /* Mặc định ẩn đi */ }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="header-text">
+            HỌC VIỆN BƯU CHÍNH VIỄN THÔNG<br>
+            CƠ SỞ TẠI TPHCM
+        </div>
+
+        <a href="#">
+            <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo PTIT" class="logo">
+        </a>
+
+        <div class="input-group">
+            <input type="text" id="username" placeholder="User name">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password" onkeypress="if(event.key === 'Enter') xuLyDangNhap()">
+        </div>
+
+        <a href="#" class="forgot-pass">Quên mật khẩu</a>
+
+        <button class="btn-login" onclick="xuLyDangNhap()">Log in</button>
+
+        <p class="error-msg" id="errorMsg">* Sai mật khẩu, hãy nhập lại</p>
+    </div>
+
+    <script>
+        function xuLyDangNhap() {
+            // 1. Lấy giá trị người dùng nhập
+            var u = document.getElementById("username").value;
+            var p = document.getElementById("password").value;
+            var msg = document.getElementById("errorMsg");
+
+            // 2. Kiểm tra (Đây là tài khoản mẫu)
+            // Tài khoản: admin
+            // Mật khẩu: 123456
+            if (u === "admin" && p === "123456") {
+                // Nếu đúng -> Chuyển sang trang home.html
+                window.location.href = "home.html";
+            } else {
+                // Nếu sai -> Hiện dòng thông báo lỗi
+                msg.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+</html>
