@@ -389,10 +389,10 @@
                 return false;
             }
             
-            // Kiểm tra timeout (10 phút = 600000 ms)
+            // Kiểm tra timeout (5 phút = 300000 ms)
             const currentTime = Date.now();
             const lastActivityTime = parseInt(sessionLastActivity);
-            const timeoutDuration = 10 * 60 * 1000; // 10 phút
+            const timeoutDuration = 5 * 60 * 1000; // 5 phút
             
             if (currentTime - lastActivityTime > timeoutDuration) {
                 // Session expired -> xóa session

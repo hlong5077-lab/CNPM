@@ -364,8 +364,8 @@
     </div>
 
     <script>
-        // Dữ liệu phòng
-        const roomsData = {
+        // Dữ liệu phòng mặc định
+        const defaultRoomsData = {
             'J01': {
                 members: [
                     { code: 'N23DCVT001', name: 'Nguyen Van A', bed: 'G5' },
@@ -379,6 +379,22 @@
                 ]
             }
         };
+
+        // Tải roomsData từ localStorage hoặc dùng dữ liệu mặc định
+        let roomsData = getRoomsDataFromStorage();
+
+        function getRoomsDataFromStorage() {
+            const stored = localStorage.getItem('roomsData');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            return defaultRoomsData;
+        }
+
+        // Lưu roomsData vào localStorage
+        function saveRoomsDataToStorage() {
+            localStorage.setItem('roomsData', JSON.stringify(roomsData));
+        }
 
         let currentRoom = '';
 
@@ -457,6 +473,9 @@
                 bed: bed
             });
 
+            // Lưu vào localStorage
+            saveRoomsDataToStorage();
+
             // Cập nhật hiển thị
             loadRoom(currentRoom);
             closeAddMemberModal();
@@ -519,6 +538,10 @@
                     // Xóa từ data
                     roomsData[currentRoom].members = roomsData[currentRoom].members.filter(m => m.code !== code);
                 });
+                
+                // Lưu vào localStorage
+                saveRoomsDataToStorage();
+                
                 // Cập nhật hiển thị
                 loadRoom(currentRoom);
                 closeDeleteMemberModal();
@@ -586,10 +609,10 @@
                 return false;
             }
             
-            // Kiểm tra timeout (10 phút = 600000 ms)
+            // Kiểm tra timeout (5 phút = 300000 ms)
             const currentTime = Date.now();
             const lastActivityTime = parseInt(sessionLastActivity);
-            const timeoutDuration = 10 * 60 * 1000; // 10 phút
+            const timeoutDuration = 5 * 60 * 1000; // 5 phút
             
             if (currentTime - lastActivityTime > timeoutDuration) {
                 // Session expired -> xóa session
