@@ -118,19 +118,17 @@
         }
 
         .back-btn-top {
-            position: absolute;
-            top: 20px;
-            left: 20px;
             background: none;
             border: none;
-            color: #ff3333;
+            color: white;
             font-size: 24px;
             cursor: pointer;
             padding: 5px;
+            margin-left: auto;
         }
 
         .back-btn-top:hover {
-            color: #cc0000;
+            color: #ffcccc;
         }
 
         .bill-status {
@@ -152,6 +150,7 @@
 
     <div class="header">
         <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <button class="back-btn-top" onclick="goBack()">←</button>
     </div>
 
     <div class="container">
@@ -173,7 +172,7 @@
                     <a href="room_info.html" class="menu-item" data-room="B2">Phòng B2</a>
                 </div>
                 
-                <a href="#" class="menu-item">Hỗ trợ</a>
+                <a href="https://youtu.be/dQw4w9WgXcQ?si=Bil_istASGQg0YK5" class="menu-item" target="_blank">Hỗ trợ</a>
             </div>
 
             <div class="sidebar-footer">
@@ -186,7 +185,6 @@
         </div>
 
         <div class="main-content">
-            <button class="back-btn-top" onclick="goBack()">←</button>
             <div class="bill-container">
                 <div class="page-title">Hóa đơn</div>
 
