@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - PTIT</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #fff5f5; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background-color: #ff3333; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; flex-shrink: 0; }
+        .menu-icon { font-size: 30px; cursor: pointer; }
+        
+        .container { display: flex; flex: 1; overflow: hidden; }
+        
+        .sidebar { width: 300px; background-color: white; border-right: 2px solid #ff3333; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; transition: width 0.3s ease, border 0.3s ease; flex-shrink: 0; }
+        .sidebar.collapsed { width: 0; border: none; }
+        .menu-list { flex: 1; padding: 0 20px; overflow-y: auto; }
+        
+        .menu-section-title { color: #ff3333; font-weight: bold; font-size: 16px; margin-top: 15px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .menu-section-title:hover { color: #cc0000; }
+        
+        .menu-item { padding: 12px 0 12px 20px; border-bottom: 2px solid #ffcccc; color: #ff3333; font-size: 16px; cursor: pointer; display: flex; align-items: center; text-decoration: none; transition: color 0.3s; }
+        .menu-item:hover { color: #cc0000; }
+        .menu-item.active { font-weight: bold; }
+        
+        .sidebar-footer { padding: 20px; display: flex; align-items: center; gap: 10px; }
+        .footer-logo { width: 50px; height: auto; }
+        .footer-text { font-size: 10px; font-weight: bold; color: #cc3333; text-transform: uppercase; line-height: 1.3; }
+        
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; align-items: center; }
+
+        .info-container {
+            background: white;
+            border: 2px solid #ff3333;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .page-title {
+            color: #ff3333;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .info-content {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+        }
+
+        .details-section {
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+
+        .info-label {
+            color: #ff3333;
+            font-weight: bold;
+            font-size: 15px;
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: #ff3333;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            gap: 15px;
+        }
+
+        .btn-edit {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-edit:hover {
+            background-color: #cc0000;
+        }
+
+        .btn-back {
+            background-color: transparent;
+            color: #ff3333;
+            border: 2px solid #ff3333;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: #ff3333;
+            color: white;
+        }
+
+        .back-btn-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: #ff3333;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .back-btn-top:hover {
+            color: #cc0000;
+        }
+
+        /* Edit Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 30px;
+            border: 2px solid #ff3333;
+            border-radius: 10px;
+            width: 450px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff3333;
+            margin-bottom: 20px;
+        }
+
+        .edit-form-group {
+            margin-bottom: 15px;
+        }
+
+        .edit-form-group label {
+            display: block;
+            color: #ff3333;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .edit-form-group input,
+        .edit-form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ff9999;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .edit-form-group select {
+            color: #ff3333;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .modal-btn-save {
+            background-color: #ff3333;
+            color: white;
+        }
+
+        .modal-btn-save:hover {
+            background-color: #cc0000;
+        }
+
+        .modal-btn-cancel {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+    </div>
+
+    <div class="container">
+        
+        <div class="sidebar" id="sidebar">
+            <div class="menu-list">
+                <a href="home.html" class="menu-item">🏠 Trang chủ</a>
+                <a href="room_info.html?view=overview" class="menu-item">📋 Thông tin phòng</a>
+                
+                <div class="menu-section-title" onclick="toggleSection(this)">▶ Khu A</div>
+                <div class="menu-subsection" style="display: none;">
+                    <a href="room_info.html" class="menu-item" data-room="A1">Phòng A1</a>
+                    <a href="room_info.html" class="menu-item" data-room="A2">Phòng A2</a>
+                </div>
+
+                <div class="menu-section-title" onclick="toggleSection(this)">▶ Khu B</div>
+                <div class="menu-subsection" style="display: none;">
+                    <a href="room_info.html" class="menu-item" data-room="B1">Phòng B1</a>
+                    <a href="room_info.html" class="menu-item" data-room="B2">Phòng B2</a>
+                </div>
+                
+                <a href="#" class="menu-item">Hỗ trợ</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+                <div class="footer-text">
+                    HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>
+                    VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <button class="back-btn-top" onclick="goBack()">←</button>
+            <div class="info-container">
+                <div class="page-title">Thông tin sinh viên</div>
+                
+                <div class="info-content">
+                    <div class="avatar-section">
+                        <div class="avatar">👤</div>
+                    </div>
+
+                    <div class="details-section">
+                        <div class="info-row">
+                            <div class="info-label">Mã SV:</div>
+                            <div class="info-value" id="studentCode">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Tên SV:</div>
+                            <div class="info-value" id="studentName">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Phòng:</div>
+                            <div class="info-value" id="studentRoom">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Giường:</div>
+                            <div class="info-value" id="studentBed">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Tình trạng:</div>
+                            <div class="info-value" id="studentStatus">Đã đóng tiền</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button class="btn-edit" onclick="editStudent()">Chỉnh sửa</button>
+                    <button class="btn-back" onclick="goBack()">Quay lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh sửa thông tin -->
+    <div id="editStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Chỉnh sửa thông tin sinh viên</div>
+            
+            <div class="edit-form-group">
+                <label for="editStudentCode">Mã SV:</label>
+                <input type="text" id="editStudentCode" placeholder="Mã sinh viên">
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentName">Tên SV:</label>
+                <input type="text" id="editStudentName" placeholder="Tên sinh viên">
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentRoom">Phòng:</label>
+                <select id="editStudentRoom">
+                    <option value="A1">Phòng A1</option>
+                    <option value="A2">Phòng A2</option>
+                    <option value="B1">Phòng B1</option>
+                    <option value="B2">Phòng B2</option>
+                </select>
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentBed">Giường:</label>
+                <input type="text" id="editStudentBed" placeholder="Giường (VD: G7)">
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentStatus">Tình trạng:</label>
+                <select id="editStudentStatus">
+                    <option value="Đã đóng tiền">Đã đóng tiền</option>
+                    <option value="Chưa đóng tiền">Chưa đóng tiền</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">Hủy</button>
+                <button class="modal-btn modal-btn-save" onclick="saveStudentInfo()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            if (!validateSession()) {
+                window.location.href = 'index.html';
+            }
+            loadStudentInfo();
+            
+            // Thêm event listener cho các menu items
+            const roomLinks = document.querySelectorAll('[data-room]');
+            roomLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const room = this.getAttribute('data-room');
+                    window.location.href = 'room_info.html?room=' + room;
+                });
+            });
+            
+            document.addEventListener('click', updateActivityTime);
+            document.addEventListener('keypress', updateActivityTime);
+        });
+
+        function loadStudentInfo() {
+            const studentInfo = sessionStorage.getItem('studentInfo');
+            if (studentInfo) {
+                const student = JSON.parse(studentInfo);
+                document.getElementById('studentCode').textContent = student.code;
+                document.getElementById('studentName').textContent = student.name;
+                document.getElementById('studentRoom').textContent = student.room;
+                document.getElementById('studentBed').textContent = student.bed;
+                document.getElementById('studentStatus').textContent = student.status || 'Đã đóng tiền';
+            }
+        }
+
+        function toggleSection(element) {
+            const subsection = element.nextElementSibling;
+            if (subsection && subsection.classList.contains('menu-subsection')) {
+                subsection.style.display = subsection.style.display === 'none' ? 'block' : 'none';
+                element.textContent = subsection.style.display === 'none' ? '▶ ' + element.textContent.slice(2) : '▼ ' + element.textContent.slice(2);
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            updateActivityTime();
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        let currentStudent = null;
+
+        function editStudent() {
+            const studentInfo = sessionStorage.getItem('studentInfo');
+            if (studentInfo) {
+                currentStudent = JSON.parse(studentInfo);
+                document.getElementById('editStudentCode').value = currentStudent.code;
+                document.getElementById('editStudentName').value = currentStudent.name;
+                document.getElementById('editStudentRoom').value = currentStudent.room;
+                document.getElementById('editStudentBed').value = currentStudent.bed;
+                document.getElementById('editStudentStatus').value = currentStudent.status || 'Đã đóng tiền';
+                document.getElementById('editStudentModal').style.display = 'block';
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editStudentModal').style.display = 'none';
+        }
+
+        function saveStudentInfo() {
+            const code = document.getElementById('editStudentCode').value.trim();
+            const name = document.getElementById('editStudentName').value.trim();
+            const room = document.getElementById('editStudentRoom').value;
+            const bed = document.getElementById('editStudentBed').value.trim();
+            const status = document.getElementById('editStudentStatus').value;
+
+            if (code === '' || name === '' || bed === '') {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+
+            // Cập nhật thông tin trong sessionStorage
+            const updatedStudent = { code, name, room, bed, status };
+            sessionStorage.setItem('studentInfo', JSON.stringify(updatedStudent));
+
+            // Cập nhật thông tin trên giao diện
+            document.getElementById('studentCode').textContent = code;
+            document.getElementById('studentName').textContent = name;
+            document.getElementById('studentRoom').textContent = room;
+            document.getElementById('studentBed').textContent = bed;
+            document.getElementById('studentStatus').textContent = status;
+
+            // Cập nhật roomsData trong localStorage
+            const roomsData = JSON.parse(localStorage.getItem('roomsData')) || {};
+            const rooms = ['A1', 'A2', 'B1', 'B2'];
+            
+            // Tìm và xóa sinh viên cũ từ tất cả các phòng
+            for (let r of rooms) {
+                if (roomsData[r]) {
+                    roomsData[r].members = roomsData[r].members.filter(m => m.code !== currentStudent.code);
+                }
+            }
+
+            // Thêm sinh viên với thông tin mới vào phòng được chọn
+            if (!roomsData[room]) {
+                roomsData[room] = { members: [] };
+            }
+            roomsData[room].members.push({ code, name, bed });
+            localStorage.setItem('roomsData', JSON.stringify(roomsData));
+
+            closeEditModal();
+            alert('Lưu thông tin thành công!');
+        }
+
+        function validateSession() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            const sessionLastActivity = localStorage.getItem('sessionLastActivity');
+            
+            if (!sessionToken) {
+                return false;
+            }
+            
+            const currentTime = Date.now();
+            const lastActivityTime = parseInt(sessionLastActivity);
+            const timeoutDuration = 5 * 60 * 1000;
+            
+            if (currentTime - lastActivityTime > timeoutDuration) {
+                logout();
+                return false;
+            }
+            
+            return true;
+        }
+
+        function updateActivityTime() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) {
+                localStorage.setItem('sessionLastActivity', Date.now());
+            }
+        }
+
+        // Đóng modal khi click vào background
+        window.onclick = function(event) {
+            const editModal = document.getElementById('editStudentModal');
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+            }
+        }
+
+        // Đóng modal khi bấm phím ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const editModal = document.getElementById('editStudentModal');
+                if (editModal.style.display === 'block') {
+                    editModal.style.display = 'none';
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

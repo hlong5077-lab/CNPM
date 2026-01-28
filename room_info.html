@@ -240,6 +240,29 @@
         .edit-modal-content {
             width: 700px;
             max-width: 90%;
+            position: relative;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #ff3333;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .modal-close-btn:hover {
+            color: #cc0000;
         }
 
         .edit-tabs {
@@ -383,10 +406,6 @@
 
     <div class="header">
         <div class="menu-icon" onclick="toggleSidebar()">☰</div>
-        <div class="user-pill">
-            admin<br>
-            N23DCVTXXX
-        </div>
     </div>
 
     <div class="container">
@@ -461,6 +480,7 @@
     <!-- Modal Chỉnh sửa (Thêm/Xóa sinh viên) -->
     <div id="editMemberModal" class="modal">
         <div class="modal-content edit-modal-content">
+            <button class="modal-close-btn" onclick="closeEditMemberModal()">✕</button>
             <div class="modal-header">Chỉnh sửa thành viên phòng</div>
             
             <div class="edit-tabs">
@@ -584,8 +604,8 @@
                         <td>${member.name}</td>
                         <td>${member.code}</td>
                         <td>${member.bed}</td>
-                        <td><a href="#" class="link-see">xem</a></td>
-                        <td><a href="#" class="link-see">xem</a></td>
+                        <td><a href="#" class="link-see" onclick="goToBill('${member.code}'); return false;">xem</a></td>
+                        <td><a href="#" class="link-see" onclick="goToStudentInfo('${member.code}'); return false;">xem</a></td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -628,20 +648,81 @@
 
         function filterTable() {
             const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
+            const filter = input.value.toLowerCase().trim();
             const table = document.getElementById('membersTable');
-            const tr = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < tr.length; i++) {
-                const cells = tr[i].getElementsByTagName('td');
-                let found = false;
-                for (let j = 0; j < cells.length; j++) {
-                    if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
-                        found = true;
-                        break;
+            const tableHead = table.querySelector('thead tr');
+            const tableBody = document.getElementById('tableBody');
+            
+            if (filter === '') {
+                // Nếu không có tìm kiếm, chỉ hiển thị phòng hiện tại
+                tableHead.innerHTML = `
+                    <th>Họ và tên SV</th>
+                    <th>Mã SV</th>
+                    <th>Giường</th>
+                    <th>Hóa đơn</th>
+                    <th>Thông tin SV</th>
+                `;
+                loadRoom(currentRoom);
+                return;
+            }
+            
+            // Thay header thành "Phòng"
+            tableHead.innerHTML = `
+                <th>Họ và tên SV</th>
+                <th>Mã SV</th>
+                <th>Phòng</th>
+                <th>Hóa đơn</th>
+                <th>Thông tin SV</th>
+            `;
+            
+            // Tìm kiếm trong tất cả các phòng
+            tableBody.innerHTML = '';
+            const rooms = ['A1', 'A2', 'B1', 'B2'];
+            
+            rooms.forEach(room => {
+                const roomData = roomsData[room];
+                if (!roomData || roomData.members.length === 0) return;
+                
+                roomData.members.forEach(member => {
+                    // Tách tên thành các từ riêng biệt
+                    const name = member.name.toLowerCase().trim();
+                    
+                    // Split các từ (tách bằng khoảng trắng)
+                    const nameWords = name.split(/\s+/).filter(w => w.length > 0);
+                    
+                    let isMatch = false;
+                    
+                    // Kiểm tra xem chuỗi tìm kiếm khớp với bắt đầu của bất kỳ từ nào trong tên
+                    for (let word of nameWords) {
+                        if (word.startsWith(filter)) {
+                            isMatch = true;
+                            break;
+                        }
                     }
-                }
-                tr[i].style.display = found ? '' : 'none';
+                    
+                    if (isMatch) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${member.name}</td>
+                            <td>${member.code}</td>
+                            <td>${room}</td>
+                            <td><a href="#" class="link-see" onclick="goToBill('${member.code}'); return false;">xem</a></td>
+                            <td><a href="#" class="link-see" onclick="goToStudentInfo('${member.code}'); return false;">xem</a></td>
+                        `;
+                        tableBody.appendChild(row);
+                    }
+                });
+            });
+            
+            // Nếu không tìm thấy kết quả
+            if (tableBody.children.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" style="text-align: center; color: #ff3333; padding: 20px;">
+                        Không tìm thấy sinh viên phù hợp
+                    </td>
+                `;
+                tableBody.appendChild(row);
             }
         }
 
@@ -836,6 +917,16 @@
             }
         }
 
+        // Đóng modal khi bấm phím ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const editModal = document.getElementById('editMemberModal');
+                if (editModal.style.display === 'block') {
+                    editModal.style.display = 'none';
+                }
+            }
+        });
+
         function validateSession() {
             const sessionToken = localStorage.getItem('sessionToken');
             const sessionLastActivity = localStorage.getItem('sessionLastActivity');
@@ -869,6 +960,36 @@
             localStorage.removeItem('sessionStart');
             localStorage.removeItem('sessionLastActivity');
             window.location.href = "index.html";
+        }
+
+        function goToStudentInfo(studentCode) {
+            const student = findStudentByCode(studentCode);
+            if (student) {
+                sessionStorage.setItem('studentInfo', JSON.stringify(student));
+                window.location.href = 'studentinfo.html';
+            }
+        }
+
+        function goToBill(studentCode) {
+            const student = findStudentByCode(studentCode);
+            if (student) {
+                sessionStorage.setItem('billInfo', JSON.stringify(student));
+                window.location.href = 'bill.html';
+            }
+        }
+
+        function findStudentByCode(code) {
+            const rooms = ['A1', 'A2', 'B1', 'B2'];
+            for (let room of rooms) {
+                const roomData = roomsData[room];
+                if (roomData && roomData.members) {
+                    const student = roomData.members.find(m => m.code === code);
+                    if (student) {
+                        return { ...student, room: room };
+                    }
+                }
+            }
+            return null;
         }
     </script>
 
