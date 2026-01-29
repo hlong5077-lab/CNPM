@@ -504,7 +504,7 @@
             if (!roomsData[room]) {
                 roomsData[room] = { members: [] };
             }
-            roomsData[room].members.push({ code, name, class: classVal, dob, bed });
+            roomsData[room].members.push({ code, name, class: classVal, dob, bed, status });
             localStorage.setItem('roomsData', JSON.stringify(roomsData));
 
             closeEditModal();
