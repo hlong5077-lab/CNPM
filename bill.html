@@ -34,8 +34,8 @@
             background: white;
             border: 2px solid #ff3333;
             border-radius: 10px;
-            padding: 40px;
-            max-width: 600px;
+            padding: 30px;
+            max-width: 1200px;
             width: 100%;
         }
 
@@ -75,6 +75,83 @@
             height: 2px;
             background-color: #ff3333;
             margin: 20px 0;
+        }
+
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .bill-table thead {
+            background-color: #fff5f5;
+            border-top: 2px solid #0099cc;
+            border-bottom: 2px solid #0099cc;
+        }
+
+        .bill-table th {
+            padding: 15px 10px;
+            text-align: left;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #0099cc;
+        }
+
+        .bill-table td {
+            padding: 12px 10px;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .bill-table tbody tr:hover {
+            background-color: #fff9f9;
+        }
+
+        .bill-table tbody tr:nth-child(even) {
+            background-color: #fff5f5;
+        }
+
+        .bill-table .currency {
+            text-align: right;
+            color: #ff3333;
+            font-weight: bold;
+        }
+
+        .bill-table .status {
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .bill-table .status.unpaid {
+            background-color: #ffe6e6;
+            color: #ff3333;
+        }
+
+        .bill-table .status.paid {
+            background-color: #e6f2ff;
+            color: #0066cc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            color: #0066cc;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .action-buttons button:hover {
+            color: #ff3333;
         }
 
         .button-container {
@@ -186,61 +263,45 @@
 
         <div class="main-content">
             <div class="bill-container">
-                <div class="page-title">Hóa đơn</div>
+                <div class="page-title">Danh sách hóa đơn</div>
 
-                <div class="bill-section">
-                    <div class="bill-row">
-                        <div class="bill-label">Mã HĐ:</div>
-                        <div class="bill-value" id="billCode">-</div>
-                    </div>
-                    <div class="bill-row">
-                        <div class="bill-label">Mã SV:</div>
-                        <div class="bill-value" id="billStudentCode">-</div>
-                    </div>
-                    <div class="bill-row">
-                        <div class="bill-label">Tên SV:</div>
-                        <div class="bill-value" id="billStudentName">-</div>
-                    </div>
-                    <div class="bill-row">
-                        <div class="bill-label">Phòng:</div>
-                        <div class="bill-value" id="billRoom">-</div>
-                    </div>
-                </div>
-
-                <div class="bill-separator"></div>
-
-                <div class="bill-section">
-                    <div class="bill-row">
-                        <div class="bill-label">Tiền phòng:</div>
-                        <div class="bill-value">1,500,000 VNĐ</div>
-                    </div>
-                    <div class="bill-row">
-                        <div class="bill-label">Tiền điện:</div>
-                        <div class="bill-value">250,000 VNĐ</div>
-                    </div>
-                    <div class="bill-row">
-                        <div class="bill-label">Tiền nước:</div>
-                        <div class="bill-value">150,000 VNĐ</div>
-                    </div>
-                </div>
-
-                <div class="bill-separator"></div>
-
-                <div class="bill-section">
-                    <div class="bill-row">
-                        <div class="bill-label" style="font-size: 18px;">Tổng cộng:</div>
-                        <div class="bill-value" style="font-size: 18px;">1,900,000 VNĐ</div>
-                    </div>
-                </div>
-
-                <div class="bill-status">
-                    <div class="bill-status-label" id="billStatus">Chưa thanh toán</div>
-                </div>
-
-                <div class="button-container">
-                    <button class="btn-print" onclick="printBill()">In hóa đơn</button>
-                    <button class="btn-back" onclick="goBack()">Quay lại</button>
-                </div>
+                <table class="bill-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã SV</th>
+                            <th>Tên sinh viên</th>
+                            <th>Lớp</th>
+                            <th>Ngày sinh</th>
+                            <th>Số hóa đơn</th>
+                            <th>Số tiền</th>
+                            <th>Ngày đóng</th>
+                            <th>Ngày lập phiếu</th>
+                            <th>Ghi chú</th>
+                            <th>Tài hóa đơn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td id="billStudentCode">-</td>
+                            <td id="billStudentName">-</td>
+                            <td id="billClass">-</td>
+                            <td id="billDob">-</td>
+                            <td id="billCode">-</td>
+                            <td class="currency" id="billAmount">-</td>
+                            <td id="billPaymentDate">-</td>
+                            <td id="billCreatedDate">-</td>
+                            <td id="billNote">-</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button onclick="downloadBill()" title="Tải xuống">📥</button>
+                                    <button onclick="printBill()" title="In hóa đơn">🖨️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -270,14 +331,20 @@
             const billInfo = sessionStorage.getItem('billInfo');
             if (billInfo) {
                 const student = JSON.parse(billInfo);
-                document.getElementById('billCode').textContent = 'HĐ-' + student.code;
                 document.getElementById('billStudentCode').textContent = student.code;
                 document.getElementById('billStudentName').textContent = student.name;
-                document.getElementById('billRoom').textContent = student.room;
-                
-                // Mặc định là chưa thanh toán
-                document.getElementById('billStatus').textContent = 'Chưa thanh toán';
+                document.getElementById('billCode').textContent = 'HĐ-' + student.code;
+                document.getElementById('billClass').textContent = student.class || '-';
+                document.getElementById('billDob').textContent = student.dob || '-';
+                document.getElementById('billAmount').textContent = student.amount || '1,900,000 VNĐ';
+                document.getElementById('billPaymentDate').textContent = student.paymentDate || '07/10/2025';
+                document.getElementById('billCreatedDate').textContent = student.createdDate || '07/10/2025';
+                document.getElementById('billNote').textContent = student.note || 'Học phí';
             }
+        }
+
+        function downloadBill() {
+            alert('Tính năng tải xuống sẽ sớm có!');
         }
 
         function toggleSection(element) {

@@ -115,7 +115,7 @@
             font-weight: bold;
             font-size: 15px;
             padding: 15px;
-            text-align: left;
+            text-align: center;
             border: 2px solid #ff3333;
             border-bottom: 2px solid #ff3333;
         }
@@ -125,6 +125,7 @@
             border: 2px solid #ff3333;
             color: #333;
             font-size: 14px;
+            text-align: center;
         }
 
         table tr:hover {
@@ -464,6 +465,8 @@
                         <tr>
                             <th>Họ và tên SV</th>
                             <th>Mã SV</th>
+                            <th>Lớp</th>
+                            <th>Ngày sinh</th>
                             <th>Giường</th>
                             <th>Hóa đơn</th>
                             <th>Thông tin SV</th>
@@ -500,6 +503,11 @@
                     </select>
                     <input type="text" id="studentName" class="modal-input" placeholder="Họ và tên sinh viên">
                     <input type="text" id="studentCode" class="modal-input" placeholder="Mã sinh viên (VD: N23DCVT001)">
+                    <input type="text" id="studentClass" class="modal-input" placeholder="Lớp (VD: D23CQVT01-N)">
+                    <div style="position: relative;">
+                        <input type="text" id="studentDob" class="modal-input" placeholder="Ngày sinh (dd/mm/yyyy)" maxlength="10" style="padding-right: 45px;">
+                        <input type="date" id="studentDobPicker" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 35px; height: 30px; border: none; cursor: pointer; background: transparent;">
+                    </div>
                     <input type="text" id="bedNumber" class="modal-input" placeholder="Giường (VD: G7)">
                     <div class="modal-buttons" style="margin-top: 15px;">
                         <button class="modal-btn modal-btn-cancel" onclick="clearAddForm()">Xóa trắng</button>
@@ -603,6 +611,8 @@
                     row.innerHTML = `
                         <td>${member.name}</td>
                         <td>${member.code}</td>
+                        <td>${member.class || '-'}</td>
+                        <td>${member.dob || '-'}</td>
                         <td>${member.bed}</td>
                         <td><a href="#" class="link-see" onclick="goToBill('${member.code}'); return false;">xem</a></td>
                         <td><a href="#" class="link-see" onclick="goToStudentInfo('${member.code}'); return false;">xem</a></td>
@@ -658,6 +668,8 @@
                 tableHead.innerHTML = `
                     <th>Họ và tên SV</th>
                     <th>Mã SV</th>
+                    <th>Lớp</th>
+                    <th>Ngày sinh</th>
                     <th>Giường</th>
                     <th>Hóa đơn</th>
                     <th>Thông tin SV</th>
@@ -670,6 +682,8 @@
             tableHead.innerHTML = `
                 <th>Họ và tên SV</th>
                 <th>Mã SV</th>
+                <th>Lớp</th>
+                <th>Ngày sinh</th>
                 <th>Phòng</th>
                 <th>Hóa đơn</th>
                 <th>Thông tin SV</th>
@@ -705,6 +719,8 @@
                         row.innerHTML = `
                             <td>${member.name}</td>
                             <td>${member.code}</td>
+                            <td>${member.class || '-'}</td>
+                            <td>${member.dob || '-'}</td>
                             <td>${room}</td>
                             <td><a href="#" class="link-see" onclick="goToBill('${member.code}'); return false;">xem</a></td>
                             <td><a href="#" class="link-see" onclick="goToStudentInfo('${member.code}'); return false;">xem</a></td>
@@ -718,7 +734,7 @@
             if (tableBody.children.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td colspan="5" style="text-align: center; color: #ff3333; padding: 20px;">
+                    <td colspan="7" style="text-align: center; color: #ff3333; padding: 20px;">
                         Không tìm thấy sinh viên phù hợp
                     </td>
                 `;
@@ -731,6 +747,7 @@
             loadDeleteMembersList();
             switchTab('add');
             document.getElementById('roomSelect').value = currentRoom;
+            setTimeout(setupDateListeners, 100);
         }
 
         function closeEditMemberModal() {
@@ -781,6 +798,8 @@
         function clearAddForm() {
             document.getElementById('studentName').value = '';
             document.getElementById('studentCode').value = '';
+            document.getElementById('studentClass').value = '';
+            document.getElementById('studentDob').value = '';
             document.getElementById('bedNumber').value = '';
             document.getElementById('roomSelect').value = currentRoom;
             document.getElementById('studentName').focus();
@@ -789,10 +808,12 @@
         function addMember() {
             const name = document.getElementById('studentName').value.trim();
             const code = document.getElementById('studentCode').value.trim();
+            const classVal = document.getElementById('studentClass').value.trim();
+            const dob = document.getElementById('studentDob').value.trim();
             const bed = document.getElementById('bedNumber').value.trim();
             const selectedRoom = document.getElementById('roomSelect').value;
 
-            if (name === '' || code === '' || bed === '') {
+            if (name === '' || code === '' || classVal === '' || dob === '' || bed === '') {
                 alert('Vui lòng điền đầy đủ thông tin!');
                 return;
             }
@@ -813,6 +834,8 @@
             roomsData[selectedRoom].members.push({
                 code: code,
                 name: name,
+                class: classVal,
+                dob: dob,
                 bed: bed
             });
 
@@ -990,6 +1013,69 @@
                 }
             }
             return null;
+        }
+
+        // Hàm định dạng ngày sinh với dấu /
+        function formatDateInput(input) {
+            let value = input.value.replace(/\D/g, ''); // Loại bỏ tất cả ký tự không phải số
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            if (value.length >= 5) {
+                value = value.slice(0, 5) + '/' + value.slice(5, 9);
+            }
+            input.value = value;
+        }
+
+        // Hàm chuyển đổi định dạng dd/mm/yyyy thành yyyy-mm-dd cho date picker
+        function convertToDateFormat(ddmmyyyy) {
+            if (!ddmmyyyy || ddmmyyyy.length !== 10) return '';
+            const parts = ddmmyyyy.split('/');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+
+        // Hàm chuyển đổi định dạng yyyy-mm-dd thành dd/mm/yyyy
+        function convertFromDateFormat(yyyymmdd) {
+            if (!yyyymmdd || yyyymmdd.length !== 10) return '';
+            const parts = yyyymmdd.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        // Setup event listeners cho ngày sinh trong modal
+        function setupDateListeners() {
+            const dobInput = document.getElementById('studentDob');
+            const dobPicker = document.getElementById('studentDobPicker');
+            
+            if (dobInput && dobPicker) {
+                // Khi gõ text, tự động thêm dấu /
+                dobInput.addEventListener('input', function() {
+                    formatDateInput(this);
+                    // Cập nhật date picker
+                    if (this.value.length === 10) {
+                        dobPicker.value = convertToDateFormat(this.value);
+                    } else {
+                        dobPicker.value = '';
+                    }
+                });
+                
+                // Khi chọn từ date picker, cập nhật text input
+                dobPicker.addEventListener('change', function() {
+                    if (this.value) {
+                        dobInput.value = convertFromDateFormat(this.value);
+                    }
+                });
+            }
+        }
+
+        // Gọi setupDateListeners khi modal được mở
+        function openEditModal() {
+            document.getElementById('editMemberModal').style.display = 'block';
+            loadDeleteMembersList();
+            switchTab('add');
+            document.getElementById('roomSelect').value = currentRoom;
+            setTimeout(setupDateListeners, 100);
         }
     </script>
 

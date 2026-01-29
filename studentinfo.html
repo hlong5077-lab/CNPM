@@ -300,6 +300,14 @@
                             <div class="info-value" id="studentName">-</div>
                         </div>
                         <div class="info-row">
+                            <div class="info-label">Lớp:</div>
+                            <div class="info-value" id="studentClass">-</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Ngày sinh:</div>
+                            <div class="info-value" id="studentDob">-</div>
+                        </div>
+                        <div class="info-row">
                             <div class="info-label">Phòng:</div>
                             <div class="info-value" id="studentRoom">-</div>
                         </div>
@@ -335,6 +343,19 @@
             <div class="edit-form-group">
                 <label for="editStudentName">Tên SV:</label>
                 <input type="text" id="editStudentName" placeholder="Tên sinh viên">
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentClass">Lớp:</label>
+                <input type="text" id="editStudentClass" placeholder="Lớp (VD: D23CQVT01-N)">
+            </div>
+
+            <div class="edit-form-group">
+                <label for="editStudentDob">Ngày sinh:</label>
+                <div style="position: relative;">
+                    <input type="text" id="editStudentDob" placeholder="dd/mm/yyyy" maxlength="10" style="width: 100%; padding: 10px; padding-right: 45px; border: 1px solid #ff9999; border-radius: 5px; box-sizing: border-box; font-size: 14px; color: #333;">
+                    <input type="date" id="editStudentDobPicker" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 35px; height: 30px; border: none; cursor: pointer; background: transparent;">
+                </div>
             </div>
 
             <div class="edit-form-group">
@@ -394,6 +415,8 @@
                 const student = JSON.parse(studentInfo);
                 document.getElementById('studentCode').textContent = student.code;
                 document.getElementById('studentName').textContent = student.name;
+                document.getElementById('studentClass').textContent = student.class || '-';
+                document.getElementById('studentDob').textContent = student.dob || '-';
                 document.getElementById('studentRoom').textContent = student.room;
                 document.getElementById('studentBed').textContent = student.bed;
                 document.getElementById('studentStatus').textContent = student.status || 'Đã đóng tiền';
@@ -426,6 +449,8 @@
                 currentStudent = JSON.parse(studentInfo);
                 document.getElementById('editStudentCode').value = currentStudent.code;
                 document.getElementById('editStudentName').value = currentStudent.name;
+                document.getElementById('editStudentClass').value = currentStudent.class || '';
+                document.getElementById('editStudentDob').value = currentStudent.dob || '';
                 document.getElementById('editStudentRoom').value = currentStudent.room;
                 document.getElementById('editStudentBed').value = currentStudent.bed;
                 document.getElementById('editStudentStatus').value = currentStudent.status || 'Đã đóng tiền';
@@ -440,22 +465,26 @@
         function saveStudentInfo() {
             const code = document.getElementById('editStudentCode').value.trim();
             const name = document.getElementById('editStudentName').value.trim();
+            const classVal = document.getElementById('editStudentClass').value.trim();
+            const dob = document.getElementById('editStudentDob').value.trim();
             const room = document.getElementById('editStudentRoom').value;
             const bed = document.getElementById('editStudentBed').value.trim();
             const status = document.getElementById('editStudentStatus').value;
 
-            if (code === '' || name === '' || bed === '') {
+            if (code === '' || name === '' || classVal === '' || dob === '' || bed === '') {
                 alert('Vui lòng điền đầy đủ thông tin!');
                 return;
             }
 
             // Cập nhật thông tin trong sessionStorage
-            const updatedStudent = { code, name, room, bed, status };
+            const updatedStudent = { code, name, class: classVal, dob, room, bed, status };
             sessionStorage.setItem('studentInfo', JSON.stringify(updatedStudent));
 
             // Cập nhật thông tin trên giao diện
             document.getElementById('studentCode').textContent = code;
             document.getElementById('studentName').textContent = name;
+            document.getElementById('studentClass').textContent = classVal;
+            document.getElementById('studentDob').textContent = dob;
             document.getElementById('studentRoom').textContent = room;
             document.getElementById('studentBed').textContent = bed;
             document.getElementById('studentStatus').textContent = status;
@@ -475,7 +504,7 @@
             if (!roomsData[room]) {
                 roomsData[room] = { members: [] };
             }
-            roomsData[room].members.push({ code, name, bed });
+            roomsData[room].members.push({ code, name, class: classVal, dob, bed });
             localStorage.setItem('roomsData', JSON.stringify(roomsData));
 
             closeEditModal();
@@ -516,6 +545,60 @@
                 editModal.style.display = 'none';
             }
         }
+
+        // Hàm định dạng ngày sinh với dấu /
+        function formatDateInput(input) {
+            let value = input.value.replace(/\D/g, ''); // Loại bỏ tất cả ký tự không phải số
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            if (value.length >= 5) {
+                value = value.slice(0, 5) + '/' + value.slice(5, 9);
+            }
+            input.value = value;
+        }
+
+        // Hàm chuyển đổi định dạng dd/mm/yyyy thành yyyy-mm-dd cho date picker
+        function convertToDateFormat(ddmmyyyy) {
+            if (!ddmmyyyy || ddmmyyyy.length !== 10) return '';
+            const parts = ddmmyyyy.split('/');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+
+        // Hàm chuyển đổi định dạng yyyy-mm-dd thành dd/mm/yyyy
+        function convertFromDateFormat(yyyymmdd) {
+            if (!yyyymmdd || yyyymmdd.length !== 10) return '';
+            const parts = yyyymmdd.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        // Setup event listeners cho ngày sinh trong studentinfo.html
+        window.addEventListener('load', function() {
+            const dobInput = document.getElementById('editStudentDob');
+            const dobPicker = document.getElementById('editStudentDobPicker');
+            
+            if (dobInput && dobPicker) {
+                // Khi gõ text, tự động thêm dấu /
+                dobInput.addEventListener('input', function() {
+                    formatDateInput(this);
+                    // Cập nhật date picker
+                    if (this.value.length === 10) {
+                        dobPicker.value = convertToDateFormat(this.value);
+                    } else {
+                        dobPicker.value = '';
+                    }
+                });
+                
+                // Khi chọn từ date picker, cập nhật text input
+                dobPicker.addEventListener('change', function() {
+                    if (this.value) {
+                        dobInput.value = convertFromDateFormat(this.value);
+                    }
+                });
+            }
+        });
 
         // Đóng modal khi bấm phím ESC
         document.addEventListener('keydown', function(event) {
